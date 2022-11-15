@@ -10,11 +10,39 @@ char file_contents[N][STRING_SIZE];
 char eval[N][STRING_SIZE];
 int eval_bool[N];
 
-
-
 // buffer variables
 char buff;
 char temp_str[STRING_SIZE];
+
+//sort -n variables
+char nums[N][STRING_SIZE]; 
+int eval_n[N];
+
+void save_to_file(char* name, int n)
+{
+    int fd, i, j;
+
+    fd = open(name, O_CREATE | O_RDWR);
+    if(fd >= 0) 
+    {
+        printf(1, "%s created sucessfully\n", name);
+    } else 
+    {
+        printf(1, "error: create backup file failed\n");
+        exit();
+    }
+
+    int size = sizeof(file_contents[0][0]);
+    for(i=0; file_contents[i][0] != '\0'; i++)
+    {
+        for(j=0; file_contents[i][j] != '\0'; j++)
+            write(fd, &file_contents[i][j], size);
+    }
+
+    printf(1, "Successful write to %s\n", name);
+    printf(1, "Printed the contents of the file with 'cat'\n");
+    close(fd);
+}
 
 int read_contents(int fd)
 {
@@ -126,6 +154,7 @@ void truncate_strings(int num_of_lines)
     }
 }
 
+// bubble sort
 void sort(int n)
 {
     int i, j, k, flag;
@@ -159,10 +188,6 @@ void sort(int n)
     }
 }
 
-
-char nums[N][STRING_SIZE]; 
-int eval_n[N];
-
 void sort_n(int n)
 {
     truncate_strings(n);
@@ -170,6 +195,7 @@ void sort_n(int n)
     int i, j, k, isNum, isNeg;
     int nums_index = 0;
 
+    // loop over the read contents
     for(i=0; eval[i][0]!='\0'; i++)
     {
         isNum=0;
@@ -206,7 +232,7 @@ void sort_n(int n)
     }
 
     int temp_n;
-    // bouble sort -n
+    // bouble sort the numbers
     for(i=0; i<=nums_index; i++)
     {                 
         for(j=i+1; j<=nums_index; j++)
@@ -225,7 +251,7 @@ void sort_n(int n)
             }
         }
     }
-
+    // sort the original input
     sort(n);
     
     // print -n
@@ -280,14 +306,48 @@ int main(int argc, char *argv[])
     }
     else if(argc == 3)
     {
-        if((fd = open(argv[1], 0)) < 0)
+        if((fd = open(argv[2], 0)) < 0)
         {
-            printf(1, "sort: cannot open file %s\n", argv[1]);
+            printf(1, "sort: cannot open file %s\n", argv[2]);
             exit();
         }
 
-        int num_of_lines = read_contents(fd);
-        sort_n(num_of_lines);
+        if(strcmp(argv[1], "-n") == 0)
+        {
+            int num_of_lines = read_contents(fd);
+            sort_n(num_of_lines);
+        }
+        if(strcmp(argv[1], "-r") == 0)
+        {
+            int num_of_lines = read_contents(fd);
+            truncate_strings(num_of_lines);
+            sort(num_of_lines);
+            for (int i = num_of_lines; i >=0; i--)
+            {
+                printf(1, "%s", file_contents[i]);
+            } 
+        }
+        else
+        {
+            printf(1, "Error: Wrong args\n");
+            exit();
+        }
+    }
+    else if(argc == 4)
+    {
+        if((fd = open(argv[3], 0)) < 0)
+        {
+            printf(1, "sort: cannot open file %s\n", argv[3]);
+            exit();
+        }
+
+        if(strcmp(argv[1], "-o") == 0)
+        {
+            int num_of_lines = read_contents(fd);
+            truncate_strings(num_of_lines);
+            sort(num_of_lines);
+            save_to_file(argv[2], num_of_lines);
+        }
     }
     else
     {
