@@ -14,9 +14,14 @@ int eval_bool[N];
 char buff;
 char temp_str[STRING_SIZE];
 
-//sort -n variables
+//-n variables
 char nums[N][STRING_SIZE]; 
 int eval_n[N];
+
+//-M variables
+char months[12][10] = { "January", "February", "March", "April", 
+                        "May", "June", "July", "August", 
+                        "September", "October", "November", "December"};
 
 void save_to_file(char* name, int n)
 {
@@ -285,7 +290,7 @@ void sort_n(int n)
 int main(int argc, char *argv[])
 {
     int fd = 0;
-    if(argc == 2)
+    if(argc == 2)   // default
     {
         if((fd = open(argv[1], 0)) < 0)
         {
@@ -299,7 +304,6 @@ int main(int argc, char *argv[])
         // print contents
         for (int i = 0; i <= num_of_lines; i++)
         {
-            // printf(1, "%c", file_contents[i][0]);
             printf(1, "%s", file_contents[i]);
         } 
 
@@ -312,20 +316,43 @@ int main(int argc, char *argv[])
             exit();
         }
 
-        if(strcmp(argv[1], "-n") == 0)
+        if(strcmp(argv[1], "-b") == 0)
         {
-            int num_of_lines = read_contents(fd);
-            sort_n(num_of_lines);
+
         }
-        if(strcmp(argv[1], "-r") == 0)
+        else if(strcmp(argv[1], "-r") == 0)
         {
             int num_of_lines = read_contents(fd);
             truncate_strings(num_of_lines);
             sort(num_of_lines);
             for (int i = num_of_lines; i >=0; i--)
+                printf(1, "%s", file_contents[i]);    
+        }
+        else if(strcmp(argv[1], "-n") == 0)
+        {
+            int num_of_lines = read_contents(fd);
+            sort_n(num_of_lines);
+        }
+        else if(strcmp(argv[1], "-M") == 0)
+        {
+
+        }
+        else if(strcmp(argv[1], "-u") == 0)
+        {   // basically sort, then uniq
+            int num_of_lines = read_contents(fd);
+            truncate_strings(num_of_lines);
+            sort(num_of_lines);
+
+            int index;
+            char* cur;
+            for(index=0; file_contents[index][0]!='\0';)
             {
-                printf(1, "%s", file_contents[i]);
-            } 
+                cur = file_contents[index];
+                index++;
+                // print as soon as you find a different string
+                while(strcmp(file_contents[index], cur) == 0) index++;
+                printf(1, "%s", cur);
+            }   
         }
         else
         {
