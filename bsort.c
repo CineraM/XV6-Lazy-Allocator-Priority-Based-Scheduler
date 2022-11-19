@@ -19,9 +19,9 @@ char nums[N][STRING_SIZE];
 int eval_n[N];
 
 //-M variables
-char months[12][10] = { "January", "February", "March", "April", 
-                        "May", "June", "July", "August", 
-                        "September", "October", "November", "December"};
+char months[12][10] = { "january", "february", "march", "april", 
+                        "may", "june", "july", "august", 
+                        "september", "october", "november", "december"};
 
 void save_to_file(char* name, int n)
 {
@@ -92,6 +92,59 @@ int read_contents(int fd)
     return n;
 }
 
+void eval_months(int num_of_lines)
+{
+    int i, j, copy;
+
+    for(i=0; i<=num_of_lines; i++)
+    {
+        copy=0;
+        memset(temp_str, 0, STRING_SIZE);
+        
+        for(j=0; j<STRING_SIZE; j++)
+        {
+            if(eval[i][j] == '\n')
+                temp_str[copy] = '\0';
+            else    
+                temp_str[copy] = eval[i][j];
+            copy++;
+        }
+
+        for(j=0; j<12; j++)
+        {
+            if(strcmp(months[j], temp_str) == 0)
+            {
+                eval_bool[i] = j+3;
+                break;
+            }
+        }
+    }
+}
+
+// only evaluate non spaces
+void truncate_b(int num_of_lines)
+{
+    int i, z, copy_idx;
+    int eidx = 0;
+    // only copy characters that are no spaces
+    for(i=0; i<=num_of_lines; i++)
+    {
+        copy_idx = 0;
+        memset(temp_str, 0, STRING_SIZE);
+        for(z=0; z<STRING_SIZE;z++) 
+        {
+            if(eval[i][z] != ' ')
+            {
+                temp_str[copy_idx] = eval[i][z];
+                copy_idx++;
+            }
+        }
+        for(z=0; z<STRING_SIZE; z++) eval[i][z] = temp_str[z];
+        eidx++; // increase index for next string
+    }
+}
+
+
 void truncate_strings(int num_of_lines)
 {
     memset(eval_bool, 0, N);
@@ -104,14 +157,12 @@ void truncate_strings(int num_of_lines)
         // finding alpha, or numeric character index in current string
         for(z=0; z<STRING_SIZE; z++)
         {
-            // if(file_contents[i][z] != ' ')
-            //     continue;
-            // else
-            //     break;
             if (file_contents[i][z] >= 48 && file_contents[i][z] <= 57) break;  // digits
             if (file_contents[i][z] >= 65 && file_contents[i][z] <= 90) break;  // cap
             if (file_contents[i][z] >= 97 && file_contents[i][z] <= 122) break; // lower
-            if (file_contents[i][z] == '-') break;  // possible negative numbers
+            if (file_contents[i][z] >= 33 && file_contents[i][z] <= 47) break;  // extra chars
+            if (file_contents[i][z] >= 58 && file_contents[i][z] <= 64) break;  // extra chars
+            if (file_contents[i][z] >= 123 && file_contents[i][z] <= 126) break;// extra chars
             if (file_contents[i][z] == '\0') break;
         }
         if(z==STRING_SIZE || file_contents[i][z] == '\0')    // if there is not a numeric || alpha char, copy all the string
@@ -136,17 +187,11 @@ void truncate_strings(int num_of_lines)
             if(z==0)
             {
                 if(temp_str[0] >= 'A' && temp_str[0] <= 'Z')
-                {
                     temp_str[0] += 32;
-                }
                 else if(temp_str[0] >= 'a' && temp_str[0] <= 'z')  
-                {
                     eval_bool[i] = 1;
-                }
                 else if(temp_str[0] >= '0' && temp_str[0] <= '9')
-                {
                     eval_bool[i] = 2;
-                }
                 else if(temp_str[0] == '-')
                 {
                     if(temp_str[1] >= '0' && temp_str[1] <= '9')
@@ -286,6 +331,42 @@ void sort_n(int n)
 
 }
 
+// bubble sort
+void sort_months(int n)
+{
+    int i, j, k, flag;
+    for(i=0; i<=n; i++)
+    {                 
+        for(j=i+1; j<=n; j++)
+        {
+            flag = 0;
+            if(eval_bool[i] <= 2 && eval_bool[j] > 2)
+            {
+                flag = 1;
+            }
+            else if(eval_bool[i] > 2 && eval_bool[j] > 2)
+            {
+                if(eval_bool[i]>eval_bool[j]) flag=1;
+            }
+
+            if(flag)
+            {
+                // original elements
+                for(k=0; k<STRING_SIZE;k++) temp_str[k] = file_contents[i][k];
+                for(k=0; k<STRING_SIZE;k++) file_contents[i][k] = file_contents[j][k]; 
+                for(k=0; k<STRING_SIZE;k++) file_contents[j][k] = temp_str[k];
+                // truncated elements
+                for(k=0; k<STRING_SIZE;k++) temp_str[k] = eval[i][k];
+                for(k=0; k<STRING_SIZE;k++) eval[i][k] = eval[j][k]; 
+                for(k=0; k<STRING_SIZE;k++) eval[j][k] = temp_str[k];
+                // bool matrix
+                int temp_bool = eval_bool[i];
+                eval_bool[i] = eval_bool[j];
+                eval_bool[j] = temp_bool;
+            }
+        }
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -303,9 +384,7 @@ int main(int argc, char *argv[])
 
         // print contents
         for (int i = 0; i <= num_of_lines; i++)
-        {
             printf(1, "%s", file_contents[i]);
-        } 
 
     }
     else if(argc == 3)
@@ -315,14 +394,18 @@ int main(int argc, char *argv[])
             printf(1, "sort: cannot open file %s\n", argv[2]);
             exit();
         }
-
+        int num_of_lines = read_contents(fd);
+        
         if(strcmp(argv[1], "-b") == 0)
         {
-
+            truncate_strings(num_of_lines);
+            truncate_b(num_of_lines);
+            sort(num_of_lines);
+            for (int i = 0; i <= num_of_lines; i++)
+                printf(1, "%s", file_contents[i]);
         }
         else if(strcmp(argv[1], "-r") == 0)
         {
-            int num_of_lines = read_contents(fd);
             truncate_strings(num_of_lines);
             sort(num_of_lines);
             for (int i = num_of_lines; i >=0; i--)
@@ -330,16 +413,19 @@ int main(int argc, char *argv[])
         }
         else if(strcmp(argv[1], "-n") == 0)
         {
-            int num_of_lines = read_contents(fd);
             sort_n(num_of_lines);
         }
         else if(strcmp(argv[1], "-M") == 0)
         {
-
+            truncate_strings(num_of_lines);
+            eval_months(num_of_lines);
+            sort(num_of_lines);
+            sort_months(num_of_lines);
+            for (int i = 0; i <= num_of_lines; i++)
+                printf(1, "%s", file_contents[i]);
         }
         else if(strcmp(argv[1], "-u") == 0)
         {   // basically sort, then uniq
-            int num_of_lines = read_contents(fd);
             truncate_strings(num_of_lines);
             sort(num_of_lines);
 
