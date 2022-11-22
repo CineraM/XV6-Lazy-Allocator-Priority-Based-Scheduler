@@ -23,6 +23,7 @@ char months[12][10] = { "january", "february", "march", "april",
                         "may", "june", "july", "august", 
                         "september", "october", "november", "december"};
 
+// saves contents of sort without aguemnts to a specified file
 void save_to_file(char* name, int n)
 {
     int fd, i, j;
@@ -49,6 +50,8 @@ void save_to_file(char* name, int n)
     close(fd);
 }
 
+// read the contents of the file, read character by character
+// and split into strings
 int read_contents(int fd)
 {
     int n = 0;
@@ -92,6 +95,8 @@ int read_contents(int fd)
     return n;
 }
 
+// loop through the truncated strings, check if
+// the string is a month. If its a month, mark it on the bool array
 void eval_months(int num_of_lines)
 {
     int i, j, copy;
@@ -144,7 +149,7 @@ void truncate_b(int num_of_lines)
     }
 }
 
-
+// skip the spaces at the beggining and find characters used in sort
 void truncate_strings(int num_of_lines)
 {
     memset(eval_bool, 0, N);
@@ -238,6 +243,8 @@ void sort(int n)
     }
 }
 
+// find the strings that are numbers, mark them on the bool array, then sort based on the numbers.
+// there is also a specific way to print them.
 void sort_n(int n)
 {
     truncate_strings(n);
@@ -331,7 +338,7 @@ void sort_n(int n)
 
 }
 
-// bubble sort
+// after parsing the months, sort them based on the value on the bool matrix
 void sort_months(int n)
 {
     int i, j, k, flag;

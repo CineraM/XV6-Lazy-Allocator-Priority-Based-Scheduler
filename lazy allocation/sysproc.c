@@ -52,9 +52,7 @@ sys_sbrk(void)
     return -1;
   addr = myproc()->sz;
   myproc()->n = n;  // increase by n
-  // if(growproc(n) < 0)
-    // return -1;
-  return addr;            // return old
+  return addr;      // return old
 }
 
 int
