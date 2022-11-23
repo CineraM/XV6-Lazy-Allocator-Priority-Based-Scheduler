@@ -4,7 +4,8 @@
 #include "fcntl.h"
 
 #define STRING_SIZE 100
-#define N 400
+#define N 1001
+// #define N 400
 // store strings, eval strings
 char file_contents[N][STRING_SIZE];
 char eval[N][STRING_SIZE];
@@ -110,8 +111,15 @@ void eval_months(int num_of_lines)
         {
             if(eval[i][j] == '\n')
                 temp_str[copy] = '\0';
-            else    
-                temp_str[copy] = eval[i][j];
+            else
+            {
+                if (eval[i][j] >= 'A' && eval[i][j] <= 'Z')
+                {
+                    temp_str[copy] = eval[i][j]+32;
+                }
+                else
+                    temp_str[copy] = eval[i][j];
+            }    
             copy++;
         }
 
@@ -242,6 +250,11 @@ void sort(int n)
             for(k=0;k<STRING_SIZE;k++) temp_str[k] = file_contents[min_idx][k];
             for(k=0;k<STRING_SIZE;k++) file_contents[min_idx][k] = file_contents[i][k];
             for(k=0;k<STRING_SIZE;k++) file_contents[i][k] = temp_str[k];
+
+            int temp_bool;
+            temp_bool = eval_bool[min_idx];
+            eval_bool[min_idx] = eval_bool[i];
+            eval_bool[i] = temp_bool;
         }
             
     }
@@ -379,8 +392,11 @@ void sort_months(int n)
     }
 }
 
+// int diff;
 int main(int argc, char *argv[])
 {
+    // int time = uptime();
+    
     int fd = 0;
     if(argc == 2)   // default
     {
@@ -396,7 +412,7 @@ int main(int argc, char *argv[])
         // print contents
         for (int i = 0; i <= num_of_lines; i++)
             printf(1, "%s", file_contents[i]);
-
+        // diff = uptime();
     }
     else if(argc == 3)
     {
@@ -432,8 +448,18 @@ int main(int argc, char *argv[])
             eval_months(num_of_lines);
             sort(num_of_lines);
             sort_months(num_of_lines);
+            
             for (int i = 0; i <= num_of_lines; i++)
-                printf(1, "%s", file_contents[i]);
+            {
+                if(eval_bool[i] <= 2)
+                    printf(1, "%s", file_contents[i]);
+            }
+            
+            for (int i = 0; i <= num_of_lines; i++)
+            {
+                if(eval_bool[i] > 2)
+                    printf(1, "%s", file_contents[i]);
+            }
         }
         else if(strcmp(argv[1], "-u") == 0)
         {   // basically sort, then uniq
@@ -480,5 +506,8 @@ int main(int argc, char *argv[])
     }
 
     close(fd);
+
+    // int temp = diff - time;
+    // printf(1, "uptime: %d\n", temp);
     exit();
 }
