@@ -382,8 +382,8 @@ scheduler(void)
       {
         if(p2->state != RUNNABLE) continue;
         
-        if(p2->priority < higher_prio->priority)
-          higher_prio = p;  
+        if(p2->priority > higher_prio->priority)
+          higher_prio = p2;  
       }
       p = higher_prio;
       // Switch to chosen process.  It is the process's job
