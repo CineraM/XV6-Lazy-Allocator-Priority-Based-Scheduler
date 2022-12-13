@@ -8,9 +8,9 @@ Add a priority variable in the proc struct. Assign a size-based priority to all 
 
 ### Unix Sort  
 Implemented the Unix sorting alrorithm with bubble/selection/quick sort.  
-  The following are supported.
-  ** -b
-  ** -r
-  ** -n
-  ** -M
-  ** -u
+  The following are supported.  
+  * -b  
+  * -r  
+  * -n  
+  * -M  
+  * -u  
